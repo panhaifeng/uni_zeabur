@@ -1,0 +1,43 @@
+# 依赖
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# HBuilderX / uni-app 本地配置
+.HBuilderX/
+.hbuilderx/
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# 编译产物（务必忽略）
+unpackage/
+dist/
+/dist/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志与临时文件
+*.log
+*.tmp
+*.temp
+*.swp
+*~
+*.swo
+
+# 环境与本地私密配置
+.env
+.env.*
+*.local
+
+# 证书与密钥
+*.pem
+*.key
+*.p12
+*.keystore
