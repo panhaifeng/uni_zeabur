@@ -1,31 +1,12 @@
 <script>
-	import Vue from 'vue'
+	import { ensureAnonymousId } from '@/common/auth.js'
+	import { get } from '@/common/request.js'
+
 	export default {
 		onLaunch() {
-			uni.getSystemInfo({
-				success: function(e) {
-					// #ifndef MP
-					Vue.prototype.StatusBar = e.statusBarHeight;
-					if (e.platform == 'android') {
-						Vue.prototype.CustomBar = e.statusBarHeight + 50;
-					} else {
-						Vue.prototype.CustomBar = e.statusBarHeight + 45;
-					}
-					// #endif
-
-					// #ifdef MP-WEIXIN
-					Vue.prototype.StatusBar = e.statusBarHeight;
-					let custom = wx.getMenuButtonBoundingClientRect();
-					Vue.prototype.Custom = custom;
-					Vue.prototype.CustomBar = custom.bottom + custom.top - e.statusBarHeight;
-					// #endif
-
-					// #ifdef MP-ALIPAY
-					Vue.prototype.StatusBar = e.statusBarHeight;
-					Vue.prototype.CustomBar = e.statusBarHeight + e.titleBarHeight;
-					// #endif
-				}
-			});
+			ensureAnonymousId()
+			// 静默初始化游客，拿到 token
+			get('/user/get-info').catch(() => {})
 		},
 		onShow() {},
 		onHide() {}
@@ -33,10 +14,11 @@
 </script>
 
 <style>
-	@import "colorui/main.css";
-	@import "colorui/icon.css";
-
 	page {
-		background-color: #f5f6f8;
+		background-color: #e8f5e9;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	}
+	button::after {
+		border: none;
 	}
 </style>

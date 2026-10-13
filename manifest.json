@@ -1,7 +1,7 @@
 {
-    "name" : "uni_zeabur",
-    "appid" : "__UNI__ZEABUR01",
-    "description" : "zeabur_pro 配套前端（UniApp）",
+    "name" : "单词打地鼠",
+    "appid" : "__UNI__WORDMOLE",
+    "description" : "单词趣味练习工具（打地鼠）",
     "versionName" : "1.0.0",
     "versionCode" : "100",
     "transformPx" : false,
@@ -26,20 +26,21 @@
         "setting" : {
             "urlCheck" : false,
             "es6" : true,
-            "minified" : true
+            "postcss" : true,
+            "minified" : true,
+            "enhance" : true
         },
-        "usingComponents" : true
+        "usingComponents" : true,
+        "lazyCodeLoading" : "requiredComponents",
+        "permission" : {}
     },
     "mp-alipay" : {
         "usingComponents" : true
     },
     "h5" : {
-        "title" : "zeabur后台",
+        "title" : "单词打地鼠",
         "router" : {
             "mode" : "hash"
-        },
-        "devServer" : {
-            "https" : false
         }
     }
 }
