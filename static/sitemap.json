@@ -1,0 +1,17 @@
+{
+  "desc": "单词打地鼠，趣味背单词小游戏页面收录配置",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "pages/index/index"
+    },
+    {
+      "action": "allow",
+      "page": "pages/select/select"
+    },
+    {
+      "action": "disallow",
+      "page": "*"
+    }
+  ]
+}

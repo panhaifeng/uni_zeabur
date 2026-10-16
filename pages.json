@@ -9,16 +9,16 @@
 		{
 			"path": "pages/index/index",
 			"style": {
+				"navigationStyle": "custom",
 				"navigationBarTitleText": "单词打地鼠",
-				"navigationBarBackgroundColor": "#2e7d32",
 				"navigationBarTextStyle": "white"
 			}
 		},
 		{
 			"path": "pages/mine/mine",
 			"style": {
+				"navigationStyle": "custom",
 				"navigationBarTitleText": "我的",
-				"navigationBarBackgroundColor": "#2e7d32",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -26,7 +26,7 @@
 			"path": "pages/select/select",
 			"style": {
 				"navigationBarTitleText": "选择词库",
-				"navigationBarBackgroundColor": "#2e7d32",
+				"navigationBarBackgroundColor": "#5DBA9D",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -34,7 +34,7 @@
 			"path": "pages/game/game",
 			"style": {
 				"navigationBarTitleText": "挑战中",
-				"navigationBarBackgroundColor": "#1b5e20",
+				"navigationBarBackgroundColor": "#4AAE95",
 				"navigationBarTextStyle": "white",
 				"disableScroll": true
 			}
@@ -43,22 +43,23 @@
 			"path": "pages/result/result",
 			"style": {
 				"navigationBarTitleText": "本局结果",
-				"navigationBarBackgroundColor": "#2e7d32",
+				"navigationBarBackgroundColor": "#5DBA9D",
 				"navigationBarTextStyle": "white"
 			}
 		}
 	],
+	"sitemapLocation": "static/sitemap.json",
 	"globalStyle": {
-		"navigationBarBackgroundColor": "#2e7d32",
+		"navigationBarBackgroundColor": "#5DBA9D",
 		"navigationBarTitleText": "单词打地鼠",
 		"navigationBarTextStyle": "white",
-		"backgroundColor": "#f3faf4"
+		"backgroundColor": "#F0FAF6"
 	},
 	"tabBar": {
-		"color": "#8a8a8a",
-		"selectedColor": "#2e7d32",
+		"color": "#9AABB0",
+		"selectedColor": "#5DBA9D",
 		"backgroundColor": "#ffffff",
-		"borderStyle": "black",
+		"borderStyle": "white",
 		"list": [
 			{
 				"pagePath": "pages/index/index",

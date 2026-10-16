@@ -1,5 +1,14 @@
 <template>
 	<view class="page">
+		<!-- 自定义顶部导航 -->
+		<view class="nav-wrap" :style="{ paddingTop: statusBarHeight + 'px' }">
+			<view class="nav-bar" :style="{ height: navBarHeight + 'px' }">
+				<view class="nav-brand">
+					<text class="nav-title">我的</text>
+				</view>
+			</view>
+		</view>
+
 		<view class="profile">
 			<view class="profile-row">
 				<image class="p-avatar" :src="avatarSrc" mode="aspectFill"></image>
@@ -53,34 +62,61 @@
 
 		<!-- 生词本 -->
 		<view v-if="tab === 'word'" class="panel">
-			<view class="empty" v-if="!words.length">暂无生词</view>
+			<view class="empty" v-if="!words.length">
+				<view class="empty-icon">📘</view>
+				<view>暂无生词，去挑战积累错词吧</view>
+			</view>
+			<view class="list-hint" v-if="words.length">点击单词可翻转查看释义</view>
 			<view class="word-card" v-for="item in words" :key="item.error_id" @tap="flip(item)">
-				<view v-if="!item.flipped" class="front">{{ item.word }}</view>
-				<view v-else class="back">
-					<view>{{ item.phonetic }}</view>
-					<view>{{ item.meaning }}</view>
+				<view class="word-main">
+					<view v-if="!item.flipped" class="word-front">
+						<text class="word-en">{{ item.word }}</text>
+						<text class="word-hint">点按翻转</text>
+					</view>
+					<view v-else class="word-back">
+						<text class="word-phonetic" v-if="item.phonetic">{{ item.phonetic }}</text>
+						<text class="word-meaning">{{ item.meaning }}</text>
+					</view>
 				</view>
-				<button class="mini-btn" size="mini" @tap.stop="removeWord(item)">移出生词本</button>
+				<view class="word-remove" @tap.stop="removeWord(item)">移出</view>
 			</view>
 		</view>
 
 		<!-- 战绩 -->
 		<view v-if="tab === 'record'" class="panel">
-			<view class="empty" v-if="!records.length">暂无对局记录</view>
-			<view class="rec" v-for="item in records" :key="item.id">
-				<view>{{ item.lib_name || ('词库' + item.lib_id) }} · {{ item.difficult }}</view>
-				<view class="rec-sub">得分 {{ item.score }} · 答对 {{ item.right_count }}/{{ item.total_count }}</view>
-				<view class="rec-sub">{{ item.create_time }}</view>
+			<view class="empty" v-if="!records.length">
+				<view class="empty-icon">🏆</view>
+				<view>暂无对局记录</view>
+			</view>
+			<view class="rec-card" v-for="item in records" :key="item.id">
+				<view class="rec-left">
+					<view class="rec-title">{{ item.lib_name || ('词库' + item.lib_id) }}</view>
+					<view class="rec-meta">
+						<text class="rec-tag">{{ item.difficult }}</text>
+						<text class="rec-sub">答对 {{ item.right_count }}/{{ item.total_count }}</text>
+					</view>
+					<view class="rec-time">{{ item.create_time }}</view>
+				</view>
+				<view class="rec-score">
+					<text class="rec-score-n">{{ item.score }}</text>
+					<text class="rec-score-l">分</text>
+				</view>
 			</view>
 		</view>
 
 		<!-- 徽章 -->
 		<view v-if="tab === 'badge'" class="panel">
 			<view class="tip">徽章仅为趣味荣誉展示，无实物/现金奖励</view>
-			<view class="empty" v-if="!badges.length">尚未解锁徽章，去玩一局吧</view>
-			<view class="badge" v-for="item in badges" :key="item.id">
-				<view class="b-name">{{ item.badge_name }}</view>
-				<view class="b-key">{{ item.badge_key }} · {{ item.unlock_time }}</view>
+			<view class="empty" v-if="!badges.length">
+				<view class="empty-icon">🎖️</view>
+				<view>尚未解锁徽章，去玩一局吧</view>
+			</view>
+			<view class="badge-card" v-for="item in badges" :key="item.id">
+				<view class="badge-icon">🏅</view>
+				<view class="badge-body">
+					<view class="b-name">{{ item.badge_name }}</view>
+					<view class="b-key">{{ item.unlock_time }}</view>
+				</view>
 			</view>
 		</view>
 
@@ -120,7 +156,9 @@
 				editNickname: '',
 				editAvatar: '',
 				avatarLocal: '',
-				saving: false
+				saving: false,
+				statusBarHeight: 20,
+				navBarHeight: 44
 			}
 		},
 		computed: {
@@ -132,6 +170,7 @@
 			}
 		},
 		onLoad(query) {
+			this.initNav()
 			if (query && query.tab) {
 				this.tab = query.tab
 			}
@@ -156,6 +195,26 @@
 			if (this.tab === 'badge') this.loadBadges()
 		},
 		methods: {
+			initNav() {
+				try {
+					const sys = uni.getSystemInfoSync()
+					this.statusBarHeight = sys.statusBarHeight || 20
+					// #ifdef MP-WEIXIN
+					const menu = uni.getMenuButtonBoundingClientRect()
+					if (menu && menu.height) {
+						this.navBarHeight = (menu.top - this.statusBarHeight) * 2 + menu.height
+					} else {
+						this.navBarHeight = 44
+					}
+					// #endif
+					// #ifndef MP-WEIXIN
+					this.navBarHeight = 44
+					// #endif
+				} catch (e) {
+					this.statusBarHeight = 20
+					this.navBarHeight = 44
+				}
+			},
 			loadInfo() {
 				return get('/user/get-info').then((res) => {
 					if (res.code === 0 && res.data) {
@@ -336,15 +395,40 @@
 <style scoped>
 	.page {
 		min-height: 100vh;
-		background: #e8f5e9;
-		padding: 24rpx;
+		background:
+			radial-gradient(ellipse 80% 40% at 0% 0%, rgba(125, 206, 184, 0.28), transparent 55%),
+			linear-gradient(180deg, #E8F7F2 0%, #F0FAF6 100%);
+		padding: 0 24rpx calc(24rpx + env(safe-area-inset-bottom));
 		box-sizing: border-box;
 	}
+	.nav-wrap {
+		margin: 0 -24rpx 12rpx;
+		padding-left: 24rpx;
+		padding-right: 24rpx;
+		background: linear-gradient(180deg, rgba(93, 186, 157, 0.16) 0%, rgba(232, 247, 242, 0) 100%);
+	}
+	.nav-bar {
+		display: flex;
+		align-items: center;
+		box-sizing: border-box;
+	}
+	.nav-brand {
+		display: flex;
+		align-items: center;
+	}
+	.nav-title {
+		font-size: 36rpx;
+		font-weight: 800;
+		color: #2F8A74;
+		letter-spacing: 4rpx;
+		line-height: 1.2;
+	}
 	.profile {
-		background: linear-gradient(135deg, #43a047, #2e7d32);
+		background: linear-gradient(145deg, #8FD4C0 0%, #5DBA9D 55%, #4AAE95 100%);
 		color: #fff;
-		border-radius: 20rpx;
-		padding: 28rpx;
+		border-radius: 28rpx;
+		padding: 32rpx;
+		box-shadow: 0 16rpx 36rpx rgba(93, 186, 157, 0.28);
 	}
 	.profile-row {
 		display: flex;
@@ -366,7 +450,7 @@
 	.profile-login {
 		margin-top: 24rpx;
 		background: #fff;
-		color: #07c160;
+		color: #5DBA9D;
 		border-radius: 999rpx;
 		font-size: 28rpx;
 		font-weight: 700;
@@ -397,7 +481,7 @@
 		text-align: center;
 		font-size: 32rpx;
 		font-weight: 700;
-		color: #1b5e20;
+		color: #2F8A74;
 	}
 	.sheet-tip {
 		margin-top: 10rpx;
@@ -418,7 +502,7 @@
 		width: 128rpx;
 		height: 128rpx;
 		border-radius: 50%;
-		background: #e8f5e9;
+		background: #E8F7F2;
 	}
 	.avatar-tip {
 		margin-top: 12rpx;
@@ -434,86 +518,235 @@
 	}
 	.save-btn {
 		margin-top: 28rpx;
-		background: #07c160;
+		background: #5DBA9D;
 		color: #fff;
 		border-radius: 999rpx;
 		font-weight: 700;
 	}
 	.stats {
-		margin-top: 20rpx;
-		background: #fff;
-		border-radius: 16rpx;
+		margin-top: 24rpx;
+		background: rgba(255,255,255,.96);
+		border-radius: 24rpx;
 		display: flex;
-		padding: 24rpx 0;
+		padding: 28rpx 0;
+		box-shadow: 0 8rpx 24rpx rgba(93, 186, 157, 0.08);
 	}
 	.stat {
 		flex: 1;
 		text-align: center;
 	}
-	.n { display: block; font-size: 32rpx; color: #2e7d32; font-weight: 700; }
+	.n { display: block; font-size: 32rpx; color: #3D9A84; font-weight: 700; }
 	.l { font-size: 22rpx; color: #888; }
 	.tabs {
-		margin-top: 20rpx;
+		margin-top: 24rpx;
 		display: flex;
-		background: #fff;
-		border-radius: 12rpx;
+		background: rgba(255,255,255,.96);
+		border-radius: 20rpx;
 		overflow: hidden;
+		box-shadow: 0 8rpx 24rpx rgba(93, 186, 157, 0.08);
 	}
 	.tab {
 		flex: 1;
 		text-align: center;
-		padding: 22rpx 0;
-		color: #666;
+		padding: 24rpx 0;
+		color: #7AA89A;
 		font-size: 28rpx;
 	}
 	.tab.on {
-		color: #2e7d32;
+		color: #3D9A84;
 		font-weight: 700;
-		background: #f1f8e9;
+		background: #E8F7F2;
 	}
 	.panel {
 		margin-top: 20rpx;
-		background: #fff;
-		border-radius: 16rpx;
+		background: rgba(255,255,255,.96);
+		border-radius: 24rpx;
 		padding: 20rpx;
 		min-height: 200rpx;
+		box-shadow: 0 8rpx 24rpx rgba(93, 186, 157, 0.08);
 	}
-	.empty { text-align: center; color: #999; padding: 40rpx 0; }
+	.list-hint {
+		font-size: 22rpx;
+		color: #9AB8AE;
+		padding: 4rpx 8rpx 16rpx;
+	}
+	.empty {
+		text-align: center;
+		color: #9AB8AE;
+		padding: 56rpx 0 48rpx;
+		font-size: 26rpx;
+	}
+	.empty-icon {
+		font-size: 48rpx;
+		margin-bottom: 12rpx;
+		line-height: 1.2;
+	}
+
 	.word-card {
-		border: 1px solid #e0e0e0;
-		border-radius: 12rpx;
-		padding: 24rpx;
+		display: flex;
+		align-items: center;
+		background: #F7FCFA;
+		border: 1rpx solid #DCEEE7;
+		border-radius: 20rpx;
+		padding: 24rpx 20rpx 24rpx 28rpx;
 		margin-bottom: 16rpx;
-		position: relative;
 	}
-	.front { font-size: 36rpx; font-weight: 700; color: #333; }
-	.back { color: #555; font-size: 28rpx; line-height: 1.6; }
-	.mini-btn {
-		margin-top: 12rpx;
-		background: #eee;
-		color: #666;
+	.word-card:last-child { margin-bottom: 0; }
+	.word-main {
+		flex: 1;
+		min-width: 0;
+		padding-right: 16rpx;
 	}
-	.rec {
-		padding: 18rpx 0;
-		border-bottom: 1px solid #f0f0f0;
+	.word-front {
+		display: flex;
+		flex-direction: column;
+	}
+	.word-en {
+		font-size: 36rpx;
+		font-weight: 700;
+		color: #2A4A42;
+		letter-spacing: 1rpx;
+	}
+	.word-hint {
+		margin-top: 8rpx;
+		font-size: 22rpx;
+		color: #9AB8AE;
+	}
+	.word-back {
+		display: flex;
+		flex-direction: column;
+	}
+	.word-phonetic {
+		font-size: 24rpx;
+		color: #7AA89A;
+		margin-bottom: 6rpx;
+	}
+	.word-meaning {
 		font-size: 28rpx;
-		color: #333;
+		color: #3D5C54;
+		line-height: 1.45;
 	}
-	.rec-sub { font-size: 24rpx; color: #888; margin-top: 6rpx; }
-	.tip { font-size: 22rpx; color: #999; margin-bottom: 16rpx; }
-	.badge {
-		padding: 18rpx 0;
-		border-bottom: 1px solid #f0f0f0;
+	.word-remove {
+		flex-shrink: 0;
+		padding: 12rpx 26rpx;
+		border-radius: 999rpx;
+		background: #fff;
+		border: 1rpx solid #E8C4BF;
+		color: #C97B73;
+		font-size: 24rpx;
+		font-weight: 600;
+		letter-spacing: 2rpx;
+		line-height: 1.2;
+		box-shadow: 0 4rpx 12rpx rgba(201, 123, 115, 0.1);
 	}
-	.b-name { font-size: 30rpx; color: #2e7d32; font-weight: 600; }
-	.b-key { font-size: 22rpx; color: #999; margin-top: 6rpx; }
+
+	.rec-card {
+		display: flex;
+		align-items: center;
+		background: #F7FCFA;
+		border: 1rpx solid #DCEEE7;
+		border-radius: 20rpx;
+		padding: 24rpx 28rpx;
+		margin-bottom: 16rpx;
+	}
+	.rec-card:last-child { margin-bottom: 0; }
+	.rec-left { flex: 1; min-width: 0; }
+	.rec-title {
+		font-size: 30rpx;
+		font-weight: 700;
+		color: #2A4A42;
+	}
+	.rec-meta {
+		margin-top: 10rpx;
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+	.rec-tag {
+		display: inline-block;
+		padding: 4rpx 14rpx;
+		border-radius: 999rpx;
+		background: #E8F7F2;
+		color: #3D9A84;
+		font-size: 20rpx;
+		font-weight: 600;
+		margin-right: 12rpx;
+	}
+	.rec-sub {
+		font-size: 22rpx;
+		color: #7AA89A;
+	}
+	.rec-time {
+		margin-top: 10rpx;
+		font-size: 22rpx;
+		color: #9AB8AE;
+	}
+	.rec-score {
+		flex-shrink: 0;
+		margin-left: 16rpx;
+		width: 100rpx;
+		height: 100rpx;
+		border-radius: 24rpx;
+		background: linear-gradient(145deg, #8FD4C0, #5DBA9D);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		box-shadow: 0 8rpx 18rpx rgba(93, 186, 157, 0.28);
+	}
+	.rec-score-n {
+		font-size: 34rpx;
+		font-weight: 800;
+		line-height: 1;
+	}
+	.rec-score-l {
+		margin-top: 4rpx;
+		font-size: 20rpx;
+		opacity: 0.9;
+	}
+
+	.tip {
+		font-size: 22rpx;
+		color: #9AB8AE;
+		margin-bottom: 16rpx;
+		padding: 0 4rpx;
+	}
+	.badge-card {
+		display: flex;
+		align-items: center;
+		background: #F7FCFA;
+		border: 1rpx solid #DCEEE7;
+		border-radius: 20rpx;
+		padding: 22rpx 24rpx;
+		margin-bottom: 16rpx;
+	}
+	.badge-card:last-child { margin-bottom: 0; }
+	.badge-icon {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 20rpx;
+		background: #FFF6E5;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 34rpx;
+		flex-shrink: 0;
+	}
+	.badge-body {
+		margin-left: 20rpx;
+		flex: 1;
+		min-width: 0;
+	}
+	.b-name { font-size: 30rpx; color: #3D9A84; font-weight: 700; }
+	.b-key { font-size: 22rpx; color: #9AB8AE; margin-top: 6rpx; }
 	.actions { margin-top: 30rpx; }
 	.btn {
 		margin-bottom: 16rpx;
 		border-radius: 48rpx;
 		background: #fff;
-		color: #2e7d32;
+		color: #3D9A84;
 	}
-	.btn.wx { background: #07c160; color: #fff; }
+	.btn.wx { background: #5DBA9D; color: #fff; }
 	.btn.danger { color: #e53935; }
 </style>

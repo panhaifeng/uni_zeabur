@@ -85,9 +85,11 @@
 			},
 			showInterstitial() {
 				// #ifdef MP-WEIXIN
+				const unitId = config.adInterstitialUnitId || ''
+				if (!unitId || unitId.indexOf('placeholder') >= 0) return
 				try {
 					const ad = uni.createInterstitialAd({
-						adUnitId: config.adInterstitialUnitId
+						adUnitId: unitId
 					})
 					ad.onError(() => {})
 					ad.show().catch(() => {})
@@ -107,7 +109,7 @@
 <style scoped>
 	.page {
 		min-height: 100vh;
-		background: #e8f5e9;
+		background: #F0FAF6;
 		padding: 40rpx 30rpx;
 		box-sizing: border-box;
 	}
@@ -120,7 +122,7 @@
 	.score {
 		font-size: 64rpx;
 		font-weight: 700;
-		color: #2e7d32;
+		color: #3D9A84;
 	}
 	.line {
 		margin-top: 12rpx;
@@ -129,7 +131,7 @@
 	}
 	.comment {
 		margin-top: 24rpx;
-		color: #43a047;
+		color: #5DBA9D;
 		font-size: 30rpx;
 		font-weight: 600;
 	}
@@ -141,7 +143,7 @@
 	}
 	.section-title {
 		font-size: 28rpx;
-		color: #1b5e20;
+		color: #2F8A74;
 		font-weight: 600;
 		margin-bottom: 16rpx;
 	}
@@ -161,11 +163,11 @@
 	.btn {
 		margin-top: 24rpx;
 		background: #fff;
-		color: #2e7d32;
+		color: #3D9A84;
 		border-radius: 48rpx;
 	}
 	.btn.primary {
-		background: #43a047;
+		background: #5DBA9D;
 		color: #fff;
 	}
 </style>

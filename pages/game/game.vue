@@ -12,9 +12,9 @@
 		</view>
 
 		<view class="switches">
-			<switch :checked="soundOn" @change="e => soundOn = e.detail.value" color="#43a047" />
+			<switch :checked="soundOn" @change="e => soundOn = e.detail.value" color="#5DBA9D" />
 			<text class="sw-label">音效</text>
-			<switch :checked="showWord" @change="e => showWord = e.detail.value" color="#43a047" />
+			<switch :checked="showWord" @change="e => showWord = e.detail.value" color="#5DBA9D" />
 			<text class="sw-label">显示英文</text>
 		</view>
 
@@ -236,7 +236,7 @@
 <style scoped>
 	.page {
 		min-height: 100vh;
-		background: linear-gradient(180deg, #66bb6a, #c8e6c9);
+		background: linear-gradient(180deg, #7DCEB8, #D8F3EA);
 		padding: 20rpx 24rpx 0;
 		box-sizing: border-box;
 	}
@@ -261,7 +261,7 @@
 		border-radius: 16rpx;
 		padding: 18rpx 24rpx;
 		font-size: 26rpx;
-		color: #2e7d32;
+		color: #3D9A84;
 	}
 	.switches {
 		margin-top: 16rpx;
@@ -270,7 +270,7 @@
 	}
 	.sw-label {
 		font-size: 24rpx;
-		color: #1b5e20;
+		color: #2F8A74;
 		margin: 0 24rpx 0 8rpx;
 	}
 	.word-area {
@@ -281,11 +281,11 @@
 	.word-en {
 		font-size: 52rpx;
 		font-weight: 700;
-		color: #1b5e20;
+		color: #2F8A74;
 	}
 	.word-tip {
 		font-size: 32rpx;
-		color: #2e7d32;
+		color: #3D9A84;
 	}
 	.phonetic {
 		margin-top: 8rpx;

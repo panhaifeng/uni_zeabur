@@ -9,8 +9,8 @@ export default {
 	tokenKey: 'mole_token',
 	userKey: 'mole_user',
 	anonymousKey: 'mole_anonymous_id',
-	// 流量主广告位（审核前替换为真实 unit-id）
-	adBannerUnitId: 'adunit-banner-placeholder',
-	adInterstitialUnitId: 'adunit-interstitial-placeholder',
+	// 流量主广告位：填入微信后台真实 adunit-xxx 后自动显示；占位/空则隐藏，不报错
+	adBannerUnitId: '',
+	adInterstitialUnitId: '',
 	disclaimer: '本为单词趣味练习工具，不属于教育培训，不保证学习效果。'
 };

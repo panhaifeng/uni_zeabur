@@ -16,10 +16,10 @@
 
 <style scoped>
 	.disclaimer {
-		padding: 24rpx 30rpx 40rpx;
+		padding: 8rpx 24rpx 8rpx;
 		font-size: 22rpx;
-		color: #999;
+		color: #9AB8AE;
 		text-align: center;
-		line-height: 1.5;
+		line-height: 1.55;
 	}
 </style>

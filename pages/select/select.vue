@@ -117,14 +117,14 @@
 <style scoped>
 	.page {
 		min-height: 100vh;
-		background: #e8f5e9;
+		background: #F0FAF6;
 		padding: 30rpx;
 		box-sizing: border-box;
 	}
 	.section-title {
 		font-size: 30rpx;
 		font-weight: 600;
-		color: #1b5e20;
+		color: #2F8A74;
 		margin: 20rpx 0;
 	}
 	.lib-item, .diff-item {
@@ -135,12 +135,12 @@
 		border: 2rpx solid transparent;
 	}
 	.lib-item.active, .diff-item.active {
-		border-color: #43a047;
-		background: #f1f8e9;
+		border-color: #5DBA9D;
+		background: #E8F7F2;
 	}
 	.lib-name, .diff-name {
 		font-size: 32rpx;
-		color: #2e7d32;
+		color: #3D9A84;
 		font-weight: 600;
 	}
 	.lib-desc, .diff-desc {
@@ -156,12 +156,12 @@
 	}
 	.retry {
 		margin-top: 16rpx;
-		background: #e8f5e9;
-		color: #2e7d32;
+		background: #E8F7F2;
+		color: #3D9A84;
 	}
 	.start-btn {
 		margin-top: 40rpx;
-		background: #43a047;
+		background: #5DBA9D;
 		color: #fff;
 		border-radius: 48rpx;
 	}

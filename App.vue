@@ -15,7 +15,7 @@
 
 <style>
 	page {
-		background-color: #e8f5e9;
+		background-color: #F0FAF6;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 	}
 	button::after {
