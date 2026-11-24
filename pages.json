@@ -46,6 +46,14 @@
 				"navigationBarBackgroundColor": "#5DBA9D",
 				"navigationBarTextStyle": "white"
 			}
+		},
+		{
+			"path": "pages/feedback/feedback",
+			"style": {
+				"navigationBarTitleText": "提建议",
+				"navigationBarBackgroundColor": "#5DBA9D",
+				"navigationBarTextStyle": "white"
+			}
 		}
 	],
 	"sitemapLocation": "static/sitemap.json",

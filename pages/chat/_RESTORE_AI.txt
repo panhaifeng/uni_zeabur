@@ -1,0 +1,26 @@
+【提审安全版说明】
+当前 pages.json 已移除 AI 页面注册与 TabBar，避免个人主体因 AI 问答类目被拒。
+
+源码仍保留：pages/chat/chat.vue
+图标仍保留：static/tabbar/ai.png、ai_cur.png
+后端接口仍保留：zeabur_pro /index/ai/*
+
+恢复 AI 上线时：
+1. 在 pages.json 的 pages 数组中，首页后加入：
+   {
+     "path": "pages/chat/chat",
+     "style": {
+       "navigationBarTitleText": "AI 助手",
+       "navigationBarBackgroundColor": "#5DBA9D",
+       "navigationBarTextStyle": "white",
+       "backgroundColor": "#F0FAF6"
+     }
+   }
+2. 在 tabBar.list 中间加入：
+   {
+     "pagePath": "pages/chat/chat",
+     "text": "AI助手",
+     "iconPath": "static/tabbar/ai.png",
+     "selectedIconPath": "static/tabbar/ai_cur.png"
+   }
+3. 确认小程序主体/类目已满足深度合成-AI问答要求后再提审。

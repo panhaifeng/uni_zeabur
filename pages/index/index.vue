@@ -48,7 +48,7 @@
 
 			<view class="space-gap space-gap-lg"></view>
 
-			<!-- 快捷入口：三块独立功能卡 -->
+			<!-- 快捷入口 -->
 			<view class="feature-grid">
 				<view class="feature-card word" @tap="goMine('word')">
 					<view class="feature-icon">📘</view>
@@ -65,6 +65,18 @@
 					<view class="feature-title">徽章</view>
 					<view class="feature-desc">趣味荣誉</view>
 				</view>
+			</view>
+
+			<!-- 提建议入口：首页显眼位置 -->
+			<view class="feedback-banner" @tap="goFeedback">
+				<view class="feedback-left">
+					<text class="feedback-emoji">💡</text>
+					<view class="feedback-copy">
+						<view class="feedback-title">提点建议</view>
+						<view class="feedback-desc">功能想法、体验吐槽都可以说</view>
+					</view>
+				</view>
+				<text class="feedback-arrow">去说说 ›</text>
 			</view>
 
 			<!-- Banner 广告 -->
@@ -153,6 +165,9 @@
 			goMine(tab) {
 				uni.setStorageSync('mole_mine_tab', tab || 'word')
 				uni.switchTab({ url: '/pages/mine/mine' })
+			},
+			goFeedback() {
+				uni.navigateTo({ url: '/pages/feedback/feedback' })
 			},
 			wxLogin() {
 				if (this.logging) return
@@ -495,6 +510,60 @@
 		color: #8AAE9F;
 		position: relative;
 		z-index: 1;
+	}
+
+	.feedback-banner {
+		margin-top: 24rpx;
+		padding: 26rpx 24rpx;
+		border-radius: 24rpx;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		background: linear-gradient(120deg, #FFF8E8 0%, #FFFDF6 55%, #F3FFF9 100%);
+		border: 1rpx solid rgba(93, 186, 157, 0.18);
+		box-shadow: 0 10rpx 24rpx rgba(93, 186, 157, 0.08);
+		flex-shrink: 0;
+	}
+	.feedback-left {
+		display: flex;
+		align-items: center;
+		gap: 16rpx;
+		min-width: 0;
+		flex: 1;
+	}
+	.feedback-emoji {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 18rpx;
+		background: rgba(255, 255, 255, 0.92);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 34rpx;
+		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+		line-height: 64rpx;
+		text-align: center;
+	}
+	.feedback-copy {
+		min-width: 0;
+		flex: 1;
+	}
+	.feedback-title {
+		font-size: 30rpx;
+		font-weight: 700;
+		color: #2F8A74;
+	}
+	.feedback-desc {
+		margin-top: 4rpx;
+		font-size: 22rpx;
+		color: #8AAE9F;
+	}
+	.feedback-arrow {
+		flex-shrink: 0;
+		margin-left: 12rpx;
+		font-size: 24rpx;
+		font-weight: 600;
+		color: #4AAE95;
 	}
 
 	.ad-wrap {

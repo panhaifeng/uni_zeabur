@@ -121,6 +121,7 @@
 		</view>
 
 		<view class="actions">
+			<button class="btn wx" @tap="goFeedback">💡 提建议</button>
 			<button v-if="user.openid" class="btn" @tap="logout">退出登录</button>
 			<button class="btn danger" @tap="clearCache">清除本地缓存</button>
 		</view>
@@ -368,6 +369,9 @@
 				} else {
 					afterNick()
 				}
+			},
+			goFeedback() {
+				uni.navigateTo({ url: '/pages/feedback/feedback' })
 			},
 			logout() {
 				clearLogin()
