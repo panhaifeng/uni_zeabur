@@ -1,11 +1,23 @@
 import config from '@/common/config.js'
 
+// 进程内缓存：避免同一次冷启动里并发请求在写入 Storage 前各自生成新 ID
+let memoryAnonymousId = ''
+
 export function ensureAnonymousId() {
-	let aid = uni.getStorageSync(config.anonymousKey) || ''
+	if (memoryAnonymousId) {
+		return memoryAnonymousId
+	}
+	let aid = ''
+	try {
+		aid = uni.getStorageSync(config.anonymousKey) || ''
+	} catch (e) {}
 	if (!aid) {
 		aid = 'anon_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10)
-		uni.setStorageSync(config.anonymousKey, aid)
+		try {
+			uni.setStorageSync(config.anonymousKey, aid)
+		} catch (e) {}
 	}
+	memoryAnonymousId = aid
 	return aid
 }
 
@@ -33,6 +45,7 @@ export function isWxUser() {
 }
 
 export function clearAllCache() {
+	memoryAnonymousId = ''
 	uni.clearStorageSync()
 }
 

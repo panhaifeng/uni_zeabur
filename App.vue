@@ -4,8 +4,8 @@
 
 	export default {
 		onLaunch() {
+			// 先固定游客 ID，再请求；避免与首页并发时各生成一个 anonymous_id
 			ensureAnonymousId()
-			// 静默初始化游客，拿到 token
 			get('/user/get-info').catch(() => {})
 		},
 		onShow() {},

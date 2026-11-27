@@ -68,6 +68,21 @@
 			},
 			saveRound() {
 				if (this.saved) return
+				// 防止结果页被重复打开时，同一局写入两条记录
+				const fp = [
+					this.result.lib_id,
+					this.result.difficult,
+					this.result.score,
+					this.result.right_count,
+					this.result.total_count,
+					(this.result.error_word_ids || []).join(',')
+				].join('|')
+				const lastFp = uni.getStorageSync('mole_last_saved_fp') || ''
+				const lastAt = Number(uni.getStorageSync('mole_last_saved_at') || 0)
+				if (fp && fp === lastFp && Date.now() - lastAt < 120000) {
+					this.saved = true
+					return
+				}
 				this.saved = true
 				post('/game/save-round', {
 					lib_id: this.result.lib_id,
@@ -77,11 +92,15 @@
 					total_count: this.result.total_count,
 					error_word_ids: this.result.error_word_ids || []
 				}, {}, true).then((res) => {
+					uni.setStorageSync('mole_last_saved_fp', fp)
+					uni.setStorageSync('mole_last_saved_at', Date.now())
 					if (res.code === 0 && res.data && res.data.new_badges && res.data.new_badges.length) {
 						const names = res.data.new_badges.map((b) => b.badge_name).join('、')
 						uni.showToast({ icon: 'none', title: '解锁徽章：' + names, duration: 2500 })
 					}
-				}).catch(() => {})
+				}).catch(() => {
+					this.saved = false
+				})
 			},
 			showInterstitial() {
 				// #ifdef MP-WEIXIN
