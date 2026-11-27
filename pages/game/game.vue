@@ -5,9 +5,9 @@
 			<text class="countdown-num">{{ countText }}</text>
 		</view>
 
-		<view class="status">
+		<view class="status" :class="{ shake: lifeShake }">
 			<text>分数 {{ score }}</text>
-			<text>生命 {{ '❤️'.repeat(Math.max(life, 0)) }}{{ life <= 0 ? '💔' : '' }}</text>
+			<text class="life-text" :class="{ hit: lifeShake }">生命 {{ '❤️'.repeat(Math.max(life, 0)) }}{{ life <= 0 ? '💔' : '' }}</text>
 			<text>{{ displayNo }} / {{ total }}</text>
 		</view>
 
@@ -24,9 +24,16 @@
 			<view class="phonetic" v-if="showWord && current">{{ current.phonetic }}</view>
 		</view>
 
+		<!-- 对错即时反馈 -->
+		<view class="judge-pop" v-if="judge.show" :class="judge.type">
+			<text class="judge-icon">{{ judge.icon }}</text>
+			<text class="judge-title">{{ judge.title }}</text>
+			<text class="judge-sub" v-if="judge.sub">{{ judge.sub }}</text>
+		</view>
+
 		<view class="holes" :class="'holes-' + holeCount">
 			<view class="hole" v-for="(hole, i) in holes" :key="i" @tap="tapHole(i)">
-				<view class="mole" :class="{ up: hole.show }">
+				<view class="mole" :class="{ up: hole.show, right: hole.result === 'right', wrong: hole.result === 'wrong', reveal: hole.result === 'reveal' }">
 					<text class="mole-text">{{ hole.text }}</text>
 				</view>
 				<view class="hole-bottom"></view>
@@ -64,7 +71,10 @@
 				showWord: true,
 				answered: false,
 				timer: null,
-				roundEnded: false
+				roundEnded: false,
+				judge: { show: false, type: '', icon: '', title: '', sub: '' },
+				lifeShake: false,
+				feedbackTimer: null
 			}
 		},
 		computed: {
@@ -92,15 +102,61 @@
 		},
 		onUnload() {
 			this.clearTimer()
+			this.clearFeedbackTimer()
 			destroyAudio()
 		},
 		methods: {
 			resetHoles() {
 				const arr = []
 				for (let i = 0; i < this.holeCount; i++) {
-					arr.push({ text: '', show: false, correct: false })
+					arr.push({ text: '', show: false, correct: false, result: '' })
 				}
 				this.holes = arr
+			},
+			showJudge(type, title, sub) {
+				const map = {
+					right: { icon: '✓', type: 'right' },
+					wrong: { icon: '✗', type: 'wrong' },
+					timeout: { icon: '⏱', type: 'timeout' }
+				}
+				const conf = map[type] || map.wrong
+				this.judge = {
+					show: true,
+					type: conf.type,
+					icon: conf.icon,
+					title: title || '',
+					sub: sub || ''
+				}
+			},
+			hideJudge() {
+				this.judge = { show: false, type: '', icon: '', title: '', sub: '' }
+			},
+			clearFeedbackTimer() {
+				if (this.feedbackTimer) {
+					clearTimeout(this.feedbackTimer)
+					this.feedbackTimer = null
+				}
+			},
+			markHoleResult(index, result) {
+				if (index < 0 || index >= this.holes.length) return
+				const next = this.holes.slice()
+				next[index] = Object.assign({}, next[index], { result, show: true })
+				this.holes = next
+			},
+			revealCorrect() {
+				const next = this.holes.map((h) => {
+					if (h.correct) {
+						return Object.assign({}, h, { result: 'reveal', show: true })
+					}
+					return h
+				})
+				this.holes = next
+			},
+			pulseLife() {
+				this.lifeShake = true
+				setTimeout(() => {
+					this.lifeShake = false
+				}, 450)
 			},
 			startCountdown() {
 				let n = 3
@@ -126,6 +182,7 @@
 					return
 				}
 				this.answered = false
+				this.hideJudge()
 				this.current = this.words[this.index]
 				this.prepareHoles()
 				if (this.soundOn) {
@@ -159,7 +216,8 @@
 				this.holes = options.map((text) => ({
 					text,
 					show: true,
-					correct: text === cur.meaning
+					correct: text === cur.meaning,
+					result: ''
 				}))
 			},
 			tapHole(i) {
@@ -172,28 +230,47 @@
 					this.score += 10
 					this.rightCount += 1
 					playSfx('right', this.soundOn)
-					this.hideMoles()
-					setTimeout(() => {
+					this.markHoleResult(i, 'right')
+					this.showJudge('right', '正确', '+10 分')
+					this.clearFeedbackTimer()
+					this.feedbackTimer = setTimeout(() => {
+						this.hideMoles()
+						this.hideJudge()
 						this.goNext()
-					}, 400)
+					}, 650)
 				} else {
-					this.onWrong(false)
+					this.onWrong(false, i)
 				}
 			},
-			onWrong(isTimeout) {
+			onWrong(isTimeout, tappedIndex) {
 				// 已处理过则忽略（超时与点击互斥）
 				if (this.answered) return
 				this.answered = true
 				this.clearTimer()
 				this.life -= 1
+				this.pulseLife()
 				playSfx('wrong', this.soundOn)
+				try {
+					uni.vibrateShort({ type: 'medium' })
+				} catch (e) {}
 				if (this.current && this.errorWordIds.indexOf(this.current.id) < 0) {
 					this.errorWordIds.push(this.current.id)
 				}
-				this.hideMoles()
-				setTimeout(() => {
+				if (!isTimeout && typeof tappedIndex === 'number') {
+					this.markHoleResult(tappedIndex, 'wrong')
+				}
+				this.revealCorrect()
+				if (isTimeout) {
+					this.showJudge('timeout', '超时', '正确答案已标出')
+				} else {
+					this.showJudge('wrong', '答错了', '正确答案已标出')
+				}
+				this.clearFeedbackTimer()
+				this.feedbackTimer = setTimeout(() => {
+					this.hideMoles()
+					this.hideJudge()
 					this.goNext()
-				}, 500)
+				}, 900)
 			},
 			goNext() {
 				if (this.roundEnded) return
@@ -205,7 +282,7 @@
 				this.nextQuestion()
 			},
 			hideMoles() {
-				this.holes = this.holes.map((h) => Object.assign({}, h, { show: false }))
+				this.holes = this.holes.map((h) => Object.assign({}, h, { show: false, result: '' }))
 			},
 			clearTimer() {
 				if (this.timer) {
@@ -217,6 +294,8 @@
 				if (this.roundEnded) return
 				this.roundEnded = true
 				this.clearTimer()
+				this.clearFeedbackTimer()
+				this.hideJudge()
 				const result = {
 					lib_id: this.libId,
 					difficult: this.difficult,
@@ -262,6 +341,22 @@
 		padding: 18rpx 24rpx;
 		font-size: 26rpx;
 		color: #3D9A84;
+		transition: background 0.2s;
+	}
+	.status.shake {
+		animation: status-shake 0.45s ease;
+		background: rgba(255, 236, 232, 0.96);
+	}
+	.life-text.hit {
+		color: #e53935;
+		font-weight: 700;
+	}
+	@keyframes status-shake {
+		0%, 100% { transform: translateX(0); }
+		20% { transform: translateX(-8rpx); }
+		40% { transform: translateX(8rpx); }
+		60% { transform: translateX(-6rpx); }
+		80% { transform: translateX(6rpx); }
 	}
 	.switches {
 		margin-top: 16rpx;
@@ -292,6 +387,45 @@
 		color: #555;
 		font-size: 26rpx;
 	}
+	.judge-pop {
+		margin: 18rpx auto 0;
+		width: 72%;
+		padding: 18rpx 20rpx;
+		border-radius: 999rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12rpx;
+		animation: judge-in 0.28s ease-out;
+		box-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.08);
+	}
+	.judge-pop.right {
+		background: linear-gradient(135deg, #34C759, #2F9E55);
+	}
+	.judge-pop.wrong,
+	.judge-pop.timeout {
+		background: linear-gradient(135deg, #FF6B5A, #E53935);
+	}
+	.judge-icon {
+		font-size: 34rpx;
+		color: #fff;
+		font-weight: 800;
+		line-height: 1;
+	}
+	.judge-title {
+		font-size: 32rpx;
+		color: #fff;
+		font-weight: 800;
+	}
+	.judge-sub {
+		font-size: 24rpx;
+		color: rgba(255, 255, 255, 0.92);
+		font-weight: 600;
+	}
+	@keyframes judge-in {
+		0% { transform: scale(0.72); opacity: 0; }
+		100% { transform: scale(1); opacity: 1; }
+	}
 	.holes {
 		margin-top: 40rpx;
 		display: flex;
@@ -320,12 +454,30 @@
 		align-items: center;
 		justify-content: center;
 		transform: translateY(160rpx);
-		transition: transform 0.25s ease-out;
+		transition: transform 0.25s ease-out, background 0.2s, box-shadow 0.2s;
 		z-index: 2;
 		padding: 0 10rpx;
 	}
 	.mole.up {
 		transform: translateY(0);
+	}
+	.mole.right {
+		background: #34C759;
+		box-shadow: 0 0 0 6rpx rgba(52, 199, 89, 0.35);
+	}
+	.mole.wrong {
+		background: #E53935;
+		box-shadow: 0 0 0 6rpx rgba(229, 57, 53, 0.3);
+		animation: mole-wrong-shake 0.35s ease;
+	}
+	.mole.reveal {
+		background: #34C759;
+		box-shadow: 0 0 0 6rpx rgba(52, 199, 89, 0.35);
+	}
+	@keyframes mole-wrong-shake {
+		0%, 100% { transform: translateY(0) rotate(0); }
+		25% { transform: translateY(0) rotate(-4deg); }
+		75% { transform: translateY(0) rotate(4deg); }
 	}
 	.mole-text {
 		color: #fff;

@@ -126,6 +126,12 @@
 			<button class="btn danger" @tap="clearCache">清除本地缓存</button>
 		</view>
 
+		<view class="legal-links">
+			<text class="legal-link" @tap="goAgreement">用户服务协议</text>
+			<text class="legal-sep">·</text>
+			<text class="legal-link" @tap="goPrivacy">隐私政策</text>
+		</view>
+
 		<disclaimer />
 	</view>
 </template>
@@ -372,6 +378,12 @@
 			},
 			goFeedback() {
 				uni.navigateTo({ url: '/pages/feedback/feedback' })
+			},
+			goAgreement() {
+				uni.navigateTo({ url: '/pages/legal/agreement' })
+			},
+			goPrivacy() {
+				uni.navigateTo({ url: '/pages/legal/privacy' })
 			},
 			logout() {
 				clearLogin()
@@ -753,4 +765,20 @@
 	}
 	.btn.wx { background: #5DBA9D; color: #fff; }
 	.btn.danger { color: #e53935; }
+	.legal-links {
+		margin-top: 8rpx;
+		margin-bottom: 12rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12rpx;
+	}
+	.legal-link {
+		font-size: 24rpx;
+		color: #2F8A74;
+	}
+	.legal-sep {
+		font-size: 22rpx;
+		color: #9AB8AE;
+	}
 </style>

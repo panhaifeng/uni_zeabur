@@ -5,6 +5,11 @@
 			<view class="hint-text">你的想法很重要，功能建议、体验吐槽、词库需求都可以告诉我们。</view>
 		</view>
 
+		<view class="notice-card">
+			<view class="notice-title">信息收集说明</view>
+			<view class="notice-p">提交建议时，我们仅收集你填写的建议内容，用于产品改进；不收集手机号、微信号等联系方式或身份信息。详情见《用户服务协议》与《隐私政策》。</view>
+		</view>
+
 		<view class="form-card">
 			<view class="label">建议内容 <text class="req">*</text></view>
 			<textarea
@@ -15,14 +20,16 @@
 				:auto-height="false"
 			/>
 			<view class="count">{{ content.length }}/1000</view>
+		</view>
 
-			<view class="label">联系方式（选填）</view>
-			<input
-				class="input"
-				v-model="contact"
-				maxlength="100"
-				placeholder="微信 / 手机号，方便我们回访"
-			/>
+		<view class="agree-row" @tap="agreed = !agreed">
+			<view class="check" :class="{ on: agreed }">{{ agreed ? '✓' : '' }}</view>
+			<view class="agree-text">
+				我已阅读并同意
+				<text class="link" @tap.stop="goAgreement">《用户服务协议》</text>
+				与
+				<text class="link" @tap.stop="goPrivacy">《隐私政策》</text>
+			</view>
 		</view>
 
 		<button class="submit-btn" :loading="submitting" :disabled="submitting" @tap="submit">提交建议</button>
@@ -40,7 +47,7 @@
 		data() {
 			return {
 				content: '',
-				contact: '',
+				agreed: false,
 				submitting: false
 			}
 		},
@@ -48,17 +55,26 @@
 			ensureAnonymousId()
 		},
 		methods: {
+			goAgreement() {
+				uni.navigateTo({ url: '/pages/legal/agreement' })
+			},
+			goPrivacy() {
+				uni.navigateTo({ url: '/pages/legal/privacy' })
+			},
 			submit() {
 				const content = (this.content || '').trim()
-				const contact = (this.contact || '').trim()
 				if (!content) {
 					uni.showToast({ icon: 'none', title: '请填写建议内容' })
+					return
+				}
+				if (!this.agreed) {
+					uni.showToast({ icon: 'none', title: '请先阅读并同意协议' })
 					return
 				}
 				if (this.submitting) return
 				this.submitting = true
 				uni.showLoading({ title: '提交中', mask: true })
-				post('/suggestion/submit', { content, contact }).then((res) => {
+				post('/suggestion/submit', { content }).then((res) => {
 					uni.hideLoading()
 					this.submitting = false
 					if (res.code === 0) {
@@ -110,6 +126,25 @@
 		color: #2F8A74;
 	}
 
+	.notice-card {
+		margin-top: 20rpx;
+		padding: 22rpx 22rpx;
+		border-radius: 20rpx;
+		background: #FFF9EE;
+		border: 1rpx solid rgba(230, 180, 80, 0.28);
+	}
+	.notice-title {
+		font-size: 26rpx;
+		font-weight: 700;
+		color: #9A6B1F;
+		margin-bottom: 8rpx;
+	}
+	.notice-p {
+		font-size: 24rpx;
+		line-height: 1.55;
+		color: #8A6A3A;
+	}
+
 	.form-card {
 		margin-top: 24rpx;
 		padding: 28rpx 24rpx 20rpx;
@@ -140,25 +175,49 @@
 	}
 	.count {
 		margin-top: 10rpx;
-		margin-bottom: 28rpx;
 		text-align: right;
 		font-size: 22rpx;
 		color: #9AB8AE;
 	}
-	.input {
-		width: 100%;
-		height: 84rpx;
-		padding: 0 20rpx;
+
+	.agree-row {
+		margin-top: 28rpx;
+		display: flex;
+		align-items: flex-start;
+		gap: 14rpx;
+		padding: 0 8rpx;
+	}
+	.check {
+		width: 36rpx;
+		height: 36rpx;
+		margin-top: 4rpx;
+		border-radius: 8rpx;
+		border: 2rpx solid #5DBA9D;
 		box-sizing: border-box;
-		border-radius: 18rpx;
-		background: #F4FAF7;
-		color: #2A4A42;
-		font-size: 28rpx;
-		margin-bottom: 8rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 22rpx;
+		color: #fff;
+		flex-shrink: 0;
+		background: #fff;
+	}
+	.check.on {
+		background: #5DBA9D;
+	}
+	.agree-text {
+		flex: 1;
+		font-size: 24rpx;
+		line-height: 1.6;
+		color: #5A7A70;
+	}
+	.link {
+		color: #2F8A74;
+		font-weight: 600;
 	}
 
 	.submit-btn {
-		margin-top: 36rpx;
+		margin-top: 28rpx;
 		height: 92rpx;
 		line-height: 92rpx;
 		border-radius: 999rpx;
